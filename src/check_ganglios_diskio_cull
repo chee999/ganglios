@@ -7,7 +7,7 @@
 #
 
 """
-@file check_ganglios_diskio
+@file check_ganglios_diskio_cull
 @brief look in ganglia for heavy disk-io
 
 Copyright (c) 2007, Linden Research, Inc.
@@ -23,9 +23,9 @@ __revision__ = '0'
 
 def main ():
     """
-    checks all hosts for the 'disk_io' metric.  
+    checks all hosts for metrics with the string wrt.  
     Usage:
-      check_ganglios_diskio threshold
+      check_ganglios_diskio_cull threshold
         threshold should be an integer above which hosts will trigger the alert
     """
     report = {}
