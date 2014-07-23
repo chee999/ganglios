@@ -38,6 +38,72 @@ _cachedir = '/var/lib/ganglia/xmlcache/'
 _stale_time = 300
 _hostdir = os.path.join(_cachedir, 'hosts')
 
+# This begs for a refactor, but cut, paste and duplicate for now.
+
+def cull_ganglia (cull, thunk):
+    """
+    cull is a callback to match on metric names.
+    thunk is a callback.
+
+    This parses the xml files in /tmp/ganglia-cache/ and calls thunk
+    every time a METRIC with cull(NAME) returns true.  Use this function for
+    method (a) above
+
+    thunk should take 3 arguments: (host-name, metric-name, value)
+    """
+    status = 0 # ok
+    bad = []
+
+    # go_bad collects xml cache files that are old, broken or otherwise
+    # unparseable and stops us from parsing them again in the future
+    def go_bad (xml_file, bad):
+        """ change status to bad, and output the stale nannybot """
+        bad_host = xml_file.replace ('.xml', '')
+        if not bad_host in bad:
+            bad += [bad_host]
+
+    try:
+        os.mkdir(_cachedir)
+    except:
+        pass
+
+    for xml_file in os.listdir(_cachedir):
+        filename = _cachedir+xml_file
+        if xml_file.endswith ('.xml'):
+            # make sure the data is fresh
+            mod_time = os.stat (filename)[stat.ST_MTIME]
+            if time.time () - mod_time > _stale_time:
+                go_bad (xml_file, bad)
+                status = 2
+            # read the xml file, look for certain metrics
+            f_hndl = open (filename)
+            try:
+                tree = ET.parse (f_hndl)
+                root = tree.getroot()
+                clusters = list(root)
+                for cluster in clusters:
+                    for host in cluster.findall('HOST'):
+                        for metric in host.findall('METRIC'):
+                            if cull(metric.attrib['NAME']):
+                                try:
+                                    thunk( host.attrib['NAME'],
+                                        metric.attrib['NAME'],
+                                        metric.attrib['VAL'])
+                                except Exception, e:
+                                    print "thunk threw an exception: %s" % e
+                                    raise
+            except expat.ExpatError:
+                go_bad (xml_file, bad)
+                status = 2
+            f_hndl.close ()
+    if len (bad) > 0:
+        if status == 0:
+            status = 2 # critical
+        sys.stdout.write ('<b>STALE</b>:')
+        for bad_host in bad:
+            sys.stdout.write (bad_host + ' ')
+    return status
+
 def parse_ganglia (metrics, thunk):
     """
     metrics is a list of strings.
