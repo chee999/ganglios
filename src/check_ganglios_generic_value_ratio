@@ -36,7 +36,7 @@ so passing 'gt 10' means CRIT if the host's value greater than 10
     # actually, any valid function supplied by the 'operator' module that return a
     # boolean will probably work, but the above functions are what I expect to use
 
-    description = """check_ganglios_generic_value_ratio -H hostname -n metric -m metric -w val -c val -o op
+    description = """check_ganglios_generic_value_ratio -H hostname -l metric -n metric -m metric -w val -c val -o op
     
     Checks the ratio of n/m of two metrics against the warning and crit values
     passed in using the operator supplied.  An example call that checks that
