@@ -46,8 +46,8 @@ so passing 'gt 10' means CRIT if the host's value greater than 10
     parser = OptionParser(usage=description)
 
     parser.add_option('-H', dest='hostname', help='hostname')
-    parser.add_option('-a', dest='add', help='metric added to another metric ')
-    parser.add_option('-s', desc='subtract', help='metric subtracted from another metric')
+    parser.add_option('-a', dest='add', help='metric to add ')
+    parser.add_option('-s', desc='subtract', help='metric to subtract')
     parser.add_option('-n', dest='numerator', help='metric to check numerator in ratio')
     parser.add_option('-m', dest='metric', help='metric to check denominator in ratio')
     parser.add_option('-o', dest='op', help='valid operators are: gt ge lt le eq ne')
